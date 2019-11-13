@@ -12,6 +12,7 @@ from fcntl import LOCK_EX, LOCK_NB, LOCK_UN, flock
 from monotonic import monotonic
 
 
+__all__ = ['Mutex']
 __title__ = 'locks'
 __version__ = '0.1.0'
 __url__ = 'https://github.com/rossmacarthur/locks'

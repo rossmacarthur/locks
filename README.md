@@ -1,6 +1,9 @@
 # locks
 
-POSIX file system locking using flock [flock](https://linux.die.net/man/2/flock).
+[![PyPI version](https://img.shields.io/pypi/v/locks.svg?style=flat-square)](https://pypi.org/project/locks/)
+[![Build status](https://img.shields.io/travis/rossmacarthur/locks/master.svg?style=flat-square)](https://travis-ci.org/rossmacarthur/locks)
+
+POSIX file system locking using [flock](https://linux.die.net/man/2/flock).
 
 ## Getting started
 
