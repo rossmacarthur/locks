@@ -26,15 +26,15 @@ class Mutex(object):
     """
     A `Mutex` represents a single exclusive file lock on the local file system.
 
-    The locks is held on a per file descriptor basis, so two instances of
+    The lock is held on a per file descriptor basis, so two instances of
     `Mutex` in the same thread will compete for a lock on the same file path.
 
     Args:
         path (str): the location of the lock.
         timeout (int/float): how long to block while waiting for the lock.
-        callback (callable): if given then the locks will try to be acquired
-            without blocking, if that fails then the callback will be called
-            once and then the locks will block indefinitely until acquired.
+        callback (callable): if given then the lock will acquired without
+            blocking, if that fails then the callback will be called once and
+            the `Mutex` will block indefinitely until the lock is acquired.
     """
 
     def __init__(self, path, timeout=None, callback=None):
@@ -45,16 +45,6 @@ class Mutex(object):
         self.timeout = timeout
         self._callback = callback
         self._fd = None
-
-    def __repr__(self):
-        return '{module}.{name}({path}{timeout})'.format(
-            module=self.__class__.__module__,
-            name=getattr(self.__class__, '__qualname__', self.__class__.__name__),
-            path='path={!r}'.format(self.path),
-            timeout=', timeout={!r}'.format(self.timeout)
-            if self.timeout is not None
-            else '',
-        )
 
     def _close_fd(self):
         if self._fd:
@@ -74,14 +64,15 @@ class Mutex(object):
 
         if self._callback or self.timeout is not None:
             end_time = monotonic() + (self.timeout or 0)
-            delay = 0.0005  # 500 us -> initial delay of 1 ms
             while True:
                 try:
                     flock(self._fd, LOCK_EX | LOCK_NB)
                     return
                 except (IOError, OSError) as e:
-                    remaining = end_time - monotonic()
-                    if remaining <= 0 or e.errno != errno.EWOULDBLOCK:
+                    if e.errno != errno.EWOULDBLOCK:
+                        self._close_fd()
+                        raise
+                    elif end_time - monotonic() <= 0:
                         if self._callback:
                             self._callback()
                             flock(self._fd, LOCK_EX)
@@ -89,8 +80,7 @@ class Mutex(object):
                         else:
                             self._close_fd()
                             raise
-                delay = min(delay * 2, remaining, 0.05)
-                time.sleep(delay)
+                time.sleep(0.001)
         else:
             flock(self._fd, LOCK_EX)
 

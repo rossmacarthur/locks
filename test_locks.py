@@ -18,64 +18,57 @@ except NameError:
 
 class TestMutex(object):
     def test___init__(self):
-        locks = Mutex('/tmp/test.lock')
-        assert locks.path == '/tmp/test.lock'
-        assert locks.timeout is None
-        assert locks._callback is None
-        assert locks._fd is None
+        mutex = Mutex('/tmp/test.lock')
+        assert mutex.path == '/tmp/test.lock'
+        assert mutex.timeout is None
+        assert mutex._callback is None
+        assert mutex._fd is None
 
-        locks = Mutex('/tmp/test.lock', timeout=3.14)
-        assert locks.path == '/tmp/test.lock'
-        assert locks.timeout == 3.14
-        assert locks._callback is None
-        assert locks._fd is None
+        mutex = Mutex('/tmp/test.lock', timeout=3.14)
+        assert mutex.path == '/tmp/test.lock'
+        assert mutex.timeout == 3.14
+        assert mutex._callback is None
+        assert mutex._fd is None
 
         callback = object()
-        locks = Mutex('/tmp/test.lock', timeout=3.14, callback=callback)
-        assert locks.path == '/tmp/test.lock'
-        assert locks.timeout == 3.14
-        assert locks._callback is callback
-        assert locks._fd is None
-
-    def test___repr__(self):
-        locks = Mutex('/tmp/test.lock')
-        assert repr(locks) == "locks.Mutex(path='/tmp/test.lock')"
-
-        locks = Mutex('/tmp/test.lock', timeout=3.14)
-        assert repr(locks) == "locks.Mutex(path='/tmp/test.lock', timeout=3.14)"
+        mutex = Mutex('/tmp/test.lock', timeout=3.14, callback=callback)
+        assert mutex.path == '/tmp/test.lock'
+        assert mutex.timeout == 3.14
+        assert mutex._callback is callback
+        assert mutex._fd is None
 
     def test_lock(self):
         _, path = tempfile.mkstemp()
 
-        locks = Mutex(path)
-        locks.lock()
+        mutex = Mutex(path)
+        mutex.lock()
         assert os.path.exists(path)
 
         # check that you can call it again, should basically be a noop
-        locks.lock()
+        mutex.lock()
 
         # check that another `Mutex` cannot acquire this one
-        locks = Mutex(path, timeout=0.5)
+        mutex = Mutex(path, timeout=0.5)
         with raises(BlockingIOError) as e:
-            locks.lock()
-        assert locks._fd is None
+            mutex.lock()
+        assert mutex._fd is None
         assert e.value.errno == errno.EAGAIN
 
     def test_lock_timeout(self):
         _, path = tempfile.mkstemp()
 
-        locks = Mutex(path, timeout=1)
-        locks.lock()
+        mutex = Mutex(path, timeout=1)
+        mutex.lock()
         assert os.path.exists(path)
 
         # check that you can call it again, should basically be a noop
-        locks.lock()
+        mutex.lock()
 
         # check that another `Mutex` cannot acquire this one
-        locks = Mutex(path, timeout=0.5)
+        mutex = Mutex(path, timeout=0.5)
         with raises(BlockingIOError) as e:
-            locks.lock()
-        assert locks._fd is None
+            mutex.lock()
+        assert mutex._fd is None
         assert e.value.errno == errno.EAGAIN
 
     def test_lock_callback(self):
@@ -96,11 +89,11 @@ class TestMutex(object):
 
     def test_release(self):
         _, path = tempfile.mkstemp()
-        locks = Mutex(path)
+        mutex = Mutex(path)
 
-        locks.lock()
+        mutex.lock()
         assert os.path.exists(path)
-        locks.release()
+        mutex.release()
         assert not os.path.exists(path)
 
     def test_with(self):
@@ -117,33 +110,33 @@ class TestMutex(object):
 
 def test_multiprocess_double_lock():
     _, path = tempfile.mkstemp()
-    locks = Mutex(path, timeout=0.5)
+    mutex = Mutex(path, timeout=0.5)
 
-    def child(locks):
+    def child(mutex):
         time.sleep(0.5)
         with raises(BlockingIOError):
-            locks.lock()
+            mutex.lock()
 
-    p = Process(target=child, args=(locks,))
+    p = Process(target=child, args=(mutex,))
     p.start()
-    locks.lock()
+    mutex.lock()
     time.sleep(1)
-    locks.release()
+    mutex.release()
     p.join()
 
 
 def test_multiprocess_double_release():
     _, path = tempfile.mkstemp()
-    locks = Mutex(path, timeout=0.5)
-    locks.lock()
+    mutex = Mutex(path, timeout=0.5)
+    mutex.lock()
 
-    def child(locks):
-        locks.release()
+    def child(mutex):
+        mutex.release()
 
-    p = Process(target=child, args=(locks,))
+    p = Process(target=child, args=(mutex,))
     p.start()
     time.sleep(1)
-    locks.release()
+    mutex.release()
     p.join()
 
 

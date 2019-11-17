@@ -7,4 +7,4 @@ if [ "$LINT" = true ]; then
     flake8 --max-complexity 10 .
 fi
 
-pytest -vx --cov=locks --cov-report term-missing --cov-fail-under 100
+pytest -vx --cov=locks --cov-report term-missing --cov-fail-under 95
