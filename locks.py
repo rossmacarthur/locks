@@ -6,6 +6,7 @@ POSIX file system locking using flock.
 
 import errno
 import os
+import random
 import time
 from fcntl import LOCK_EX, LOCK_NB, LOCK_UN, flock
 
@@ -22,6 +23,49 @@ __license__ = 'MIT'
 __description__ = 'POSIX file system locking using flock'
 
 
+class Waiter(object):
+    """
+    A `Waiter` defines a waiting style when trying to acquire a lock with a
+    non-blocking way. The `__call__()` method sleeps until we should try attempt
+    to acquire the lock again.
+
+    This class should be subclassed.
+    """
+
+    def __init__(self):
+        pass
+
+    def __call__(self):
+        raise NotImplementedError('this method should be overridden')
+
+
+class ConstantWaiter(Waiter):
+    """
+    Wait a constant amount of time. This is sufficient when there are very few
+    threads/processes trying to access the lock.
+    """
+
+    def __init__(self, delay):
+        self.delay = delay
+
+    def __call__(self):
+        return self.delay
+
+
+class RandomWaiter(Waiter):
+    """
+    Wait a random amount of time. This can handle very many processes but does
+    not give longer waiting processes any advantage.
+    """
+
+    def __init__(self, min_delay, max_delay):
+        self.min_delay = min_delay
+        self.max_delay = max_delay
+
+    def __call__(self):
+        return random.uniform(self.min_delay, self.max_delay)
+
+
 class Mutex(object):
     """
     A `Mutex` represents a single exclusive file lock on the local file system.
@@ -32,18 +76,25 @@ class Mutex(object):
     Args:
         path (str): the location of the lock.
         timeout (int/float): how long to block while waiting for the lock.
+        waiter (Waiter): a waiter to use when trying to acquire a lock in a
+            non-blocking way.
         callback (callable): if given then the lock will acquired without
             blocking, if that fails then the callback will be called once and
             the `Mutex` will block indefinitely until the lock is acquired.
     """
 
-    def __init__(self, path, timeout=None, callback=None):
+    def __init__(self, path, timeout=None, waiter=None, callback=None):
         """
         Create a new `Mutex`.
         """
         self.path = path
         self.timeout = timeout
         self._callback = callback
+        self._waiter = waiter
+
+        if not self._waiter and (self._callback or self.timeout is not None):
+            self._waiter = ConstantWaiter(0.001)
+
         self._fd = None
 
     def _close_fd(self):
@@ -60,7 +111,7 @@ class Mutex(object):
         lock and it will not block.
         """
         if not self._fd:
-            self._fd = os.open(self.path, os.O_RDWR | os.O_CREAT)
+            self._fd = os.open(self.path, os.O_CREAT | os.O_RDWR)
 
         if self._callback or self.timeout is not None:
             end_time = monotonic() + (self.timeout or 0)
@@ -69,10 +120,11 @@ class Mutex(object):
                     flock(self._fd, LOCK_EX | LOCK_NB)
                     return
                 except (IOError, OSError) as e:
+                    remaining = end_time - monotonic()
                     if e.errno != errno.EWOULDBLOCK:
                         self._close_fd()
                         raise
-                    elif end_time - monotonic() <= 0:
+                    elif remaining <= 0:
                         if self._callback:
                             self._callback()
                             flock(self._fd, LOCK_EX)
@@ -80,7 +132,7 @@ class Mutex(object):
                         else:
                             self._close_fd()
                             raise
-                time.sleep(0.001)
+                time.sleep(min(remaining, self._waiter()))
         else:
             flock(self._fd, LOCK_EX)
 
