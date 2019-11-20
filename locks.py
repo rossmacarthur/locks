@@ -14,7 +14,7 @@ from monotonic import monotonic
 
 __all__ = ['Mutex']
 __title__ = 'locks'
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 __url__ = 'https://github.com/rossmacarthur/locks'
 __author__ = 'Ross MacArthur'
 __author_email__ = 'ross@macarthur.io'
