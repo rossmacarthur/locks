@@ -1,9 +1,22 @@
-# locks
-
-[![PyPI version](https://img.shields.io/pypi/v/locks.svg?style=flat-square)](https://pypi.org/project/locks/)
-[![Build status](https://img.shields.io/travis/rossmacarthur/locks/master.svg?style=flat-square)](https://travis-ci.org/rossmacarthur/locks)
-
-POSIX file system locking using [flock](https://linux.die.net/man/2/flock).
+<h1 align="center">locks</h1>
+<div align="center">
+  <strong>POSIX file system locking using <a href="https://linux.die.net/man/2/flock">flock</a></strong>
+</div>
+<br />
+<div align="center">
+  <a href="https://pypi.org/project/locks/">
+    <img src="https://img.shields.io/pypi/v/locks" alt="PyPI version" />
+  </a>
+  <a href="https://github.com/rossmacarthur/locks/actions?query=workflow%3Abuild">
+    <img src="https://img.shields.io/github/workflow/status/rossmacarthur/locks/build/master" alt="Build status" />
+  </a>
+  <a href="https://codecov.io/gh/rossmacarthur/locks" alt="Code coverage">
+    <img src="https://img.shields.io/codecov/c/github/rossmacarthur/locks" />
+  </a>
+  <a href="https://github.com/psf/black">
+    <img src="https://img.shields.io/badge/code%20style-black-101010.svg" alt="Code style: black" />
+  </a>
+</div>
 
 ## Getting started
 
