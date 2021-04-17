@@ -1,6 +1,6 @@
 name: build
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   test:
@@ -8,12 +8,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [2.7, pypy2, 3.5, 3.6, 3.7, 3.8, pypy3]
+        python-version: [2.7, pypy2, 3.5, 3.6, 3.7, 3.8, 3.9, pypy3]
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
 
-    - uses: actions/setup-python@v1
+    - uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -21,7 +21,7 @@ jobs:
       run: pip install -r dev-requirements.in .
 
     - name: Lint
-      if: matrix.python-version == 3.7
+      if: matrix.python-version == 3.9
       run: |
         black --skip-string-normalization --check .
         flake8 --max-complexity 10 .
@@ -30,7 +30,7 @@ jobs:
       run: pytest -vx --cov=locks --cov-report term-missing --cov-fail-under 95
 
     - name: Upload coverage report to Codecov
-      if: matrix.python-version == 3.7
+      if: matrix.python-version == 3.9
       run: pip install codecov && codecov --slug=$GITHUB_REPOSITORY --branch=$GITHUB_REF --commit=$GITHUB_SHA
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
@@ -43,11 +43,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
 
-    - uses: actions/setup-python@v1
+    - uses: actions/setup-python@v2
       with:
-        python-version: 3.7
+        python-version: 3.9
 
     - name: Check tag against package version
       run: grep '__version__' locks.py | grep -q "'${GITHUB_REF#refs/tags/}'"
