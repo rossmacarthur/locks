@@ -71,14 +71,15 @@ class TestMutex(object):
         assert mutex._fd is None
         assert e.value.errno == errno.EAGAIN
 
+    @staticmethod
+    def child(path):
+        with Mutex(path):
+            time.sleep(1)
+
     def test_lock_callback(self):
         _, path = tempfile.mkstemp()
 
-        def child():
-            with Mutex(path):
-                time.sleep(1)
-
-        p = Process(target=child)
+        p = Process(target=self.__class__.child, args=(path,))
         callback = Mock()
         p.start()
         time.sleep(0.5)
@@ -108,16 +109,17 @@ class TestMutex(object):
         assert not os.path.exists(path)
 
 
+def child_1(mutex):
+    time.sleep(0.5)
+    with raises(BlockingIOError):
+        mutex.lock()
+
+
 def test_multiprocess_double_lock():
     _, path = tempfile.mkstemp()
     mutex = Mutex(path, timeout=0.5)
 
-    def child(mutex):
-        time.sleep(0.5)
-        with raises(BlockingIOError):
-            mutex.lock()
-
-    p = Process(target=child, args=(mutex,))
+    p = Process(target=child_1, args=(mutex,))
     p.start()
     mutex.lock()
     time.sleep(1)
@@ -125,15 +127,16 @@ def test_multiprocess_double_lock():
     p.join()
 
 
+def child_2(mutex):
+    mutex.release()
+
+
 def test_multiprocess_double_release():
     _, path = tempfile.mkstemp()
     mutex = Mutex(path, timeout=0.5)
     mutex.lock()
 
-    def child(mutex):
-        mutex.release()
-
-    p = Process(target=child, args=(mutex,))
+    p = Process(target=child_2, args=(mutex,))
     p.start()
     time.sleep(1)
     mutex.release()
