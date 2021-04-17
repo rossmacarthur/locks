@@ -49,7 +49,7 @@ install_requires = ['monotonic >=1.0']
 setup(
     # Options
     install_requires=install_requires,
-    python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*',
+    python_requires='>=3.5',
     py_modules=['locks'],
     # Metadata
     download_url='{url}/archive/{version}.tar.gz'.format(**metadata),
@@ -60,8 +60,6 @@ setup(
         'Natural Language :: English',
         'Operating System :: POSIX',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
