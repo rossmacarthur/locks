@@ -1,22 +1,11 @@
-<h1 align="center">locks</h1>
-<div align="center">
-  <strong>POSIX file system locking using <a href="https://linux.die.net/man/2/flock">flock</a></strong>
-</div>
-<br />
-<div align="center">
-  <a href="https://pypi.org/project/locks/">
-    <img src="https://img.shields.io/pypi/v/locks" alt="PyPI version" />
-  </a>
-  <a href="https://github.com/rossmacarthur/locks/actions?query=workflow%3Abuild">
-    <img src="https://img.shields.io/github/workflow/status/rossmacarthur/locks/build/master" alt="Build status" />
-  </a>
-  <a href="https://codecov.io/gh/rossmacarthur/locks" alt="Code coverage">
-    <img src="https://img.shields.io/codecov/c/github/rossmacarthur/locks" />
-  </a>
-  <a href="https://github.com/psf/black">
-    <img src="https://img.shields.io/badge/code%20style-black-101010.svg" alt="Code style: black" />
-  </a>
-</div>
+# locks
+
+*POSIX file system locking using [flock](https://linux.die.net/man/2/flock).*
+
+[![PyPI version](https://img.shields.io/pypi/v/locks)](https://pypi.org/project/locks/)
+[![Build status](https://img.shields.io/github/workflow/status/rossmacarthur/locks/build/trunk)](https://github.com/rossmacarthur/locks/actionsquery=workflow%3Abuild)
+[![](https://img.shields.io/codecov/c/github/rossmacarthur/locks)](https://codecov.io/gh/rossmacarthur/locks)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-101010.svg)](https://github.com/psf/black)
 
 ## Getting started
 
@@ -67,6 +56,10 @@ indefinitely.
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE] file.
+Licensed under either of
 
-[LICENSE]: LICENSE
+- Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or
+  http://www.apache.org/licenses/LICENSE-2.0)
+- MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+
+at your option.

@@ -55,6 +55,7 @@ setup(
     download_url='{url}/archive/{version}.tar.gz'.format(**metadata),
     project_urls={'Issue Tracker': '{url}/issues'.format(**metadata)},
     classifiers=[
+        'License :: OSI Approved :: Apache Software License',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         'Operating System :: POSIX',
